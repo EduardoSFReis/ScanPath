@@ -18,12 +18,12 @@ print('Em caso de error ou fechar a janela sem querer renicie o terminal')
 #Abre a pagina de arquivo
 root = tk.Tk()
 root.withdraw()
-file_csv = filedialog.askopenfilename()
+file_csv = filedialog.askopenfilename(title="Selecione o fixation_on_surface")
 
 #Define a imagem
 root = tk.Tk()
 root.withdraw()
-file_image = filedialog.askopenfilename()
+file_image = filedialog.askopenfilename(title="Selecione a imagem")
 imagem = (file_image)
 
 #Le a imagem e reconhece o tamanho da imagem
