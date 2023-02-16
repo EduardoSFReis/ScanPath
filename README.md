@@ -1,5 +1,5 @@
 # ScanPath
-Esse é um scan path feito por mim usando em manhor parte matplotlib e bibliotecas para auxiliar o rastremento dos dados, 
+Esse é um scan path feito por mim usando em maior parte matplotlib e bibliotecas para auxiliar o rastremento dos dados, 
 ele foi feito para pegar as cordenadas do Pupil player um equipamento de rastreamento ocular para fazer tais graficos.
 
 O funcionamento é da seguinte forma ao rodar o codigo ele abre uma guia de arquivo e voce deve selecionar o arquivo .csv
