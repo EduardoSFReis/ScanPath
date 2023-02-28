@@ -14,14 +14,11 @@ from tkinter import filedialog
 
 def SelecionarCSV():
     root = tk.Tk()
-
     file_csv = filedialog.askopenfilename(title='Primeiro leia os arquivos fixation_on_surface')
     return file_csv
 
 def SelecionarImagem():
     root = tk.Tk()
- 
-   
     file_image = filedialog.askopenfilename(title='Leia a Imagem')
     return file_image
 
