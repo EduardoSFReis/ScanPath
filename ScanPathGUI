@@ -1,0 +1,151 @@
+import cv2
+import pandas as pd
+import csv
+import math as m
+import matplotlib.pyplot as plt
+from PIL import Image
+import tkinter as tk
+from tkinter import filedialog
+
+class Tela:
+    def __init__(self, master):
+        self.master = master
+        master.title("Tela de Exemplo")
+
+        # Criando os campos de texto
+        self.corC_label = tk.Label(master, text="Cor do Circulo:")
+        self.corC_entry = tk.Entry(master)
+        self.corL_label = tk.Label(master, text="Cor da Letra:")
+        self.corL_entry = tk.Entry(master)
+        self.tL_label = tk.Label(master, text="Tamanhi da Letra:")
+        self.tL_entry = tk.Entry(master)
+        self.transparenciaC_label = tk.Label(master, text="Transparência do Circulo:")
+        self.transparenciaC_entry = tk.Entry(master)
+
+        # Criando os botões de seleção de arquivo
+        self.file_csv_label = tk.Label(master, text="Arquivo CSV fixation_on_surface:")
+        self.file_csv_button = tk.Button(master, text="Selecionar", command=self.select_csv_file)
+        self.file_image_label = tk.Label(master, text="Arquivo de Imagem:")
+        self.file_image_button = tk.Button(master, text="Selecionar", command=self.select_image_file)
+
+        # Criando o botão de plotar
+        self.salvar_button = tk.Button(master, text="Plotar Gráfico", command=self.salvar)
+
+        # Exibindo os campos de texto e botões na tela
+        self.corC_label.grid(row=0, column=0)
+        self.corC_entry.grid(row=0, column=1)
+        self.corL_label.grid(row=1, column=0)
+        self.corL_entry.grid(row=1, column=1)
+        self.tL_label.grid(row=2, column=0)
+        self.tL_entry.grid(row=2, column=1)
+        self.transparenciaC_label.grid(row=3, column=0)
+        self.transparenciaC_entry.grid(row=3, column=1)
+        self.file_csv_label.grid(row=4, column=0)
+        self.file_csv_button.grid(row=4, column=1)
+        self.file_image_label.grid(row=5, column=0)
+        self.file_image_button.grid(row=5, column=1)
+        self.salvar_button.grid(row=6, column=0, columnspan=2)
+
+    def select_csv_file(self):
+        self.file_csv = filedialog.askopenfilename(title="Selecione o arquivo CSV", filetypes=[("CSV Files", "*.csv")])
+
+    def select_image_file(self):
+        self.file_image = filedialog.askopenfilename(title="Selecione o arquivo de imagem", filetypes=[("Image Files", "*.jpg;*.jpeg;*.png;*.gif")])
+
+    def salvar(self):
+        self.corC = self.corC_entry.get()
+        self.corL = self.corL_entry.get()
+        self.tL = self.tL_entry.get()
+        self.transparenciaC = self.transparenciaC_entry.get()
+        print("Valores salvos:")
+        print(f"Cor C: {self.corC}")
+        print(f"Cor L: {self.corL}")
+        print(f"TL: {self.tL}")
+        print(f"Transparência C: {self.transparenciaC}")
+        print(f"Arquivo CSV: {self.file_csv}")
+        print(f"Arquivo de Imagem: {self.file_image}")
+        
+        self.master.destroy()   
+    
+    def get_info(self):
+        return self.file_csv, self.file_image, self.corC, self.corL, self.tL
+        
+        
+
+def PlotGrafico(df, image, corC, corL, tL):
+    width, height = Image.open(image).size
+    L = width - 20  #Largura(x)
+    H = height #Altura(y)
+    
+    # Define a imagem
+    image = plt.imread(image)
+    fig, ax = plt.subplots()
+
+    # Acompanha a posição do círculo anterior
+    prev_x, prev_y = None, None
+
+    # Acompanha os id
+    prev_id = None
+    id = 0
+
+    
+    for index, row in df.iterrows():
+        world_timestamp = row['world_timestamp']
+        world_index = row['world_index']
+        fixation_id = int(row['fixation_id'])
+        start_timestamp = row['start_timestamp']
+        duration = float(row['duration'])
+        dispersion = row['dispersion']
+        norm_pos_x = float(row['norm_pos_x'])
+        norm_pos_y = float(row['norm_pos_y'])
+        x_scaled = row['x_scaled']
+        y_scaled = row['y_scaled']
+        on_surf = row['on_surf']
+
+        y = norm_pos_y * H
+        x = norm_pos_x * L
+        r = duration / 2
+
+        # Salva os id para criar o plot
+        if prev_id != fixation_id:
+            ax.scatter(x,y, s=r,color=corC,alpha=0.5)
+            # Se este não for o primeiro círculo, desenhe uma linha conectando-o ao círculo anterior
+            if prev_x is not None and prev_y is not None:
+                ax.plot([prev_x,x], [prev_y, y],color=corC,alpha=0.6)
+               
+            # Escreve o numero
+            id += 1
+            ax.text(x, y, id, fontsize=tL, color=corL)
+        
+            # Salve a posição do círculo atual para a próxima iteração
+            prev_x = x
+            prev_y = y
+            prev_id = fixation_id
+
+    plt.axis('off');
+    image = cv2.flip(image, 0)
+    plt.imshow(image)
+    plt.gca().invert_yaxis()
+    plt.show()
+
+def LerCSV(file_csv):
+    df = pd.read_csv(file_csv)
+    return df
+
+
+root = tk.Tk()
+
+# Criando a tela
+tela = Tela(root)
+
+# Iniciando o loop de eventos da interface gráfica
+root.mainloop()
+
+# Obtendo as informações inseridas na tela
+file_csv, file_image, corC, corL, tL = tela.get_info()
+
+#Ler arquivo csv
+df = LerCSV(file_csv)
+
+# Chamando a função PlotGrafico com as informações coletadas
+PlotGrafico(df, file_image, corC, corL, tL)
